@@ -8,11 +8,11 @@ using AppsDistrib_HCEG_DBAPI.Settings;
 namespace AppsDistrib_HCEG_DBAPI.Controllers
 {
     [ApiController]
-    [Route("api/customers")]
-    public class CustomersController : ControllerBase
+    [Route("api/products")]
+    public class ProductsController : ControllerBase
     {
         //A constructor for this class is needed so that when it is called the config and evnironment info needed are passed
-        public CustomersController(IConfiguration config, IWebHostEnvironment env)
+        public ProductsController(IConfiguration config, IWebHostEnvironment env)
         {
             this.config = config;
             this.env = env;
@@ -24,9 +24,9 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
         private string db;//Connection string
 
         [HttpPost]//Maps method to Post request
-        public async Task<ActionResult<Customer>> CreateCustomer(Customer customer)
+        public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            string createCustomer = "INSERT INTO \"Customers\"(\"IdDocument\", \"FullName\", \"Phone\", \"Email\", \"Address\", \"BirthDate\") VALUES(@0, @1, @2, @3, @4, @5)";
+            string createCustomer = "INSERT INTO \"Products\"(\"Name\", \"Price\") VALUES(@0, @1)";
 
             try
             {
@@ -38,32 +38,28 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                         using (NpgsqlCommand cmd = conn.CreateCommand())
                         {
                             cmd.CommandText = createCustomer;
-                            cmd.Parameters.AddWithValue("@0", customer.IdDocument);//Replace the parameters of the string
-                            cmd.Parameters.AddWithValue("@1", customer.FullName);
-                            cmd.Parameters.AddWithValue("@2", customer.Phone);
-                            cmd.Parameters.AddWithValue("@3", customer.Email);
-                            cmd.Parameters.AddWithValue("@4", customer.Address);
-                            cmd.Parameters.AddWithValue("@5", customer.BirthDate);
+                            cmd.Parameters.AddWithValue("@0", product.Name);//Replace the parameters of the string
+                            cmd.Parameters.AddWithValue("@1", product.Price);
                             cmd.ExecuteNonQuery();
-                        }                 
+                        }
                     }
                     conn.Close();
                 }
                 //Create a basic profile when a user is created
-                return Ok(customer);
+                return Ok(product);
             }
             catch (Exception eSql)
             {
                 Debug.WriteLine("Exception: " + eSql.Message);
-                return StatusCode(500, new object[] { eSql.Message, customer});
+                return StatusCode(500, new object[] { eSql.Message, product });
             }
         }
 
         [HttpGet]//Maps this method to the GET request (read)
-        public async Task<ActionResult<List<Customer>>> ReadCustomers()
+        public async Task<ActionResult<List<Product>>> ReadProducts()
         {
-            List<Customer> customers = new List<Customer>();
-            string readCustomers = "SELECT * FROM \"Customers\"";
+            List<Product> products = new List<Product>();
+            string readCustomers = "SELECT * FROM \"Products\"";
             try
             {
                 using (NpgsqlConnection conn = new NpgsqlConnection(db))
@@ -78,23 +74,19 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                             {
                                 while (reader.Read())
                                 {
-                                    var customer = new Customer();
+                                    var product = new Product();
                                     //Use castings so that nulls get created if needed
-                                    customer.FullName = reader[0] as string;
-                                    customer.Phone = reader[1] as string;
-                                    customer.Email = reader[2] as string;
-                                    customer.Address = reader[3] as string;
-                                    customer.BirthDate = reader.GetDateTime(4);
-                                    customer.CustomerId = reader.GetInt32(5);//Get an int from the first column
-                                    customer.IdDocument = reader[6] as string;
-                                    customers.Add(customer);//Add customer to list
+                                    product.ProductId = reader.GetInt32(0);
+                                    product.Name = reader[1] as string;
+                                    product.Price = reader.GetDouble(2);
+                                    products.Add(product);//Add customer to list
                                 }
                             }
                         }
                     }
                     conn.Close();
                 }
-                return Ok(customers);
+                return Ok(products);
             }
             catch (Exception eSql)
             {
@@ -104,9 +96,9 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
         }
 
         [HttpPut]//Maps this method to the Put request (update)
-        public async Task<ActionResult<Customer>> UpdateCustomer(Customer customer)
+        public async Task<ActionResult<Product>> UpdateProduct(Product product)
         {
-            string updateCustomer = "UPDATE \"Customers\" SET \"IdDocument\"=@0, \"FullName\"=@1, \"Phone\"=@2, \"Email\"=@3, \"Address\"=@4, \"BirthDate\"=@5 WHERE \"CustomerId\" = @6";
+            string updateCustomer = "UPDATE \"Products\" SET \"Name\"=@0, \"Price\"=@1 WHERE \"ProductId\" = @2";
             try
             {
                 int affectedRows = 0;
@@ -118,13 +110,9 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                         using (NpgsqlCommand cmd = conn.CreateCommand())
                         {
                             cmd.CommandText = updateCustomer;
-                            cmd.Parameters.AddWithValue("@0", customer.IdDocument);//Replace the parameters of the string
-                            cmd.Parameters.AddWithValue("@1", customer.FullName);
-                            cmd.Parameters.AddWithValue("@2", customer.Phone);
-                            cmd.Parameters.AddWithValue("@3", customer.Email);
-                            cmd.Parameters.AddWithValue("@4", customer.Address);
-                            cmd.Parameters.AddWithValue("@5", customer.BirthDate);
-                            cmd.Parameters.AddWithValue("@6", customer.CustomerId);
+                            cmd.Parameters.AddWithValue("@0", product.Name);//Replace the parameters of the string
+                            cmd.Parameters.AddWithValue("@1", product.Price);
+                            cmd.Parameters.AddWithValue("@2", product.ProductId);
                             affectedRows = cmd.ExecuteNonQuery();
                         }
                     }
@@ -132,15 +120,15 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                 }
                 if (affectedRows > 0)
                 {
-                    return Ok(customer);
+                    return Ok(product);
                 }
             }
             catch (Exception eSql)
             {
                 Debug.WriteLine("Exception: " + eSql.Message);
-                return StatusCode(500, new object[] { eSql.Message, customer });
+                return StatusCode(500, new object[] { eSql.Message, product });
             }
-            return BadRequest("Customer not found");
+            return BadRequest("Product not found");
         }
     }
 }
