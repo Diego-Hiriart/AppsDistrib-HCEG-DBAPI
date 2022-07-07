@@ -26,7 +26,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
         [HttpPost]//Maps method to Post request
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            string createCustomer = "INSERT INTO \"Products\"(\"Name\", \"Price\") VALUES(@0, @1)";
+            string createProduct = "INSERT INTO \"Products\"(\"Name\", \"Price\") VALUES(@0, @1)";
 
             try
             {
@@ -37,7 +37,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                     {
                         using (NpgsqlCommand cmd = conn.CreateCommand())
                         {
-                            cmd.CommandText = createCustomer;
+                            cmd.CommandText = createProduct;
                             cmd.Parameters.AddWithValue("@0", product.Name);//Replace the parameters of the string
                             cmd.Parameters.AddWithValue("@1", product.Price);
                             cmd.ExecuteNonQuery();
@@ -59,7 +59,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
         public async Task<ActionResult<List<Product>>> ReadProducts()
         {
             List<Product> products = new List<Product>();
-            string readCustomers = "SELECT * FROM \"Products\"";
+            string readProducts = "SELECT * FROM \"Products\"";
             try
             {
                 using (NpgsqlConnection conn = new NpgsqlConnection(db))
@@ -69,7 +69,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                     {
                         using (NpgsqlCommand cmd = conn.CreateCommand())
                         {
-                            cmd.CommandText = readCustomers;
+                            cmd.CommandText = readProducts;
                             using (NpgsqlDataReader reader = cmd.ExecuteReader())
                             {
                                 while (reader.Read())
@@ -79,7 +79,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                                     product.ProductId = reader.GetInt32(0);
                                     product.Name = reader[1] as string;
                                     product.Price = reader.GetDouble(2);
-                                    products.Add(product);//Add customer to list
+                                    products.Add(product);//Add product to list
                                 }
                             }
                         }
@@ -98,7 +98,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
         [HttpPut]//Maps this method to the Put request (update)
         public async Task<ActionResult<Product>> UpdateProduct(Product product)
         {
-            string updateCustomer = "UPDATE \"Products\" SET \"Name\"=@0, \"Price\"=@1 WHERE \"ProductId\" = @2";
+            string updateProduct = "UPDATE \"Products\" SET \"Name\"=@0, \"Price\"=@1 WHERE \"ProductId\" = @2";
             try
             {
                 int affectedRows = 0;
@@ -109,7 +109,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                     {
                         using (NpgsqlCommand cmd = conn.CreateCommand())
                         {
-                            cmd.CommandText = updateCustomer;
+                            cmd.CommandText = updateProduct;
                             cmd.Parameters.AddWithValue("@0", product.Name);//Replace the parameters of the string
                             cmd.Parameters.AddWithValue("@1", product.Price);
                             cmd.Parameters.AddWithValue("@2", product.ProductId);
