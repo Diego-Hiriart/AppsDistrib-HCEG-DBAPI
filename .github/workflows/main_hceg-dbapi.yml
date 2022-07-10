@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'hceg-dbapi'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4D7B7A39AFBD4B27A0E75F3AFD333226 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_21BA4899B74D46F5842418C0D2FF3D12 }}
           package: .
