@@ -92,5 +92,44 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                 return StatusCode(500, eSql.Message);
             }
         }
+
+        [HttpGet("search")]//Maps this method to the GET request (read)
+        public async Task<ActionResult<List<OrderItem>>> SearchOrderItems(int id)
+        {
+            List<OrderItem> orderItems = new List<OrderItem>();
+            string readOrderItems = "SELECT * FROM \"OrderItems\" WHERE \"OrderId\" = @0";
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(db))
+                {
+                    conn.Open();
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        using (NpgsqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = readOrderItems;
+                            cmd.Parameters.AddWithValue("@0", id);
+                            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    var orderItem = new OrderItem();
+                                    orderItem.OrderId = reader.GetInt32(0);
+                                    orderItem.ProductId = reader.GetInt32(1);
+                                    orderItems.Add(orderItem);//Add order to list
+                                }
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+                return Ok(orderItems);
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+                return StatusCode(500, eSql.Message);
+            }
+        }
     }
 }

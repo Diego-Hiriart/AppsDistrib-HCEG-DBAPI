@@ -95,6 +95,45 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
             }
         }
 
+        [HttpGet("search")]//Maps this method to the GET request (read)
+        public async Task<ActionResult<List<Product>>> SearchProduct(int id)
+        {
+            Product product = new Product();
+            string readProducts = "SELECT * FROM \"Products\" WHERE \"ProductId\" = @0";
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(db))
+                {
+                    conn.Open();
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        using (NpgsqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = readProducts;
+                            cmd.Parameters.AddWithValue("@0", id);
+                            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    //Use castings so that nulls get created if needed
+                                    product.ProductId = reader.GetInt32(0);
+                                    product.Name = reader[1] as string;
+                                    product.Price = reader.GetDouble(2);
+                                }
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+                return Ok(product);
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+                return StatusCode(500, eSql.Message);
+            }
+        }
+
         [HttpPut]//Maps this method to the Put request (update)
         public async Task<ActionResult<Product>> UpdateProduct(Product product)
         {

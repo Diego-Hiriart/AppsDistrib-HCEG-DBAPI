@@ -45,7 +45,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                             cmd.Parameters.AddWithValue("@4", customer.Address);
                             cmd.Parameters.AddWithValue("@5", customer.BirthDate);
                             cmd.ExecuteNonQuery();
-                        }                 
+                        }
                     }
                     conn.Close();
                 }
@@ -55,7 +55,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
             catch (Exception eSql)
             {
                 Debug.WriteLine("Exception: " + eSql.Message);
-                return StatusCode(500, new object[] { eSql.Message, customer});
+                return StatusCode(500, new object[] { eSql.Message, customer });
             }
         }
 
@@ -95,6 +95,49 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                     conn.Close();
                 }
                 return Ok(customers);
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+                return StatusCode(500, eSql.Message);
+            }
+        }
+
+        [HttpGet("search")]//Maps this method to the GET request (read)
+        public async Task<ActionResult<List<Customer>>> SearchCustomer(int id)//Uses the value from the search params (?=id)
+        {
+            Customer customer = new Customer();
+            string readCustomers = "SELECT * FROM \"Customers\" WHERE \"CustomerId\" = @0";
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(db))
+                {
+                    conn.Open();
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        using (NpgsqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = readCustomers;
+                            cmd.Parameters.AddWithValue("@0", id);
+                            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    //Use castings so that nulls get created if needed
+                                    customer.FullName = reader[0] as string;
+                                    customer.Phone = reader[1] as string;
+                                    customer.Email = reader[2] as string;
+                                    customer.Address = reader[3] as string;
+                                    customer.BirthDate = reader.GetDateTime(4);
+                                    customer.CustomerId = reader.GetInt32(5);//Get an int from the first column
+                                    customer.IdDocument = reader[6] as string;
+                                }
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+                return Ok(customer);
             }
             catch (Exception eSql)
             {
