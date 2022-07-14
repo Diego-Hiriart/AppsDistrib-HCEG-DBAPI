@@ -11,7 +11,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
     [Route("api/customers")]
     public class CustomersController : ControllerBase
     {
-        //A constructor for this class is needed so that when it is called the config and evnironment info needed are passed
+        //A constructor for this class is needed so that when it is called the config and environment info needed are passed
         public CustomersController(IConfiguration config, IWebHostEnvironment env)
         {
             this.config = config;
