@@ -128,5 +128,41 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                 return StatusCode(500, eSql.Message);
             }
         }
+
+        [HttpGet("latest")]//Maps this method to the GET request (read)
+        public async Task<ActionResult<List<Order>>> LastOrder()
+        {
+            Order order = new Order();
+            string readLatestOrder = "SELECT * FROM \"Orders\" ORDER BY \"OrderId\" DESC LIMIT 1";
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(db))
+                {
+                    conn.Open();
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        using (NpgsqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = readLatestOrder;
+                            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    order.OrderId = reader.GetInt32(0);
+                                    order.Date = reader.GetDateTime(1);
+                                }
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+                return Ok(order);
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+                return StatusCode(500, eSql.Message);
+            }
+        }
     }
 }
