@@ -56,7 +56,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
             catch (Exception eSql)
             {
                 Debug.WriteLine("Exception: " + eSql.Message);
-                return StatusCode(500, new object[] { eSql.Message, invoice });
+                return StatusCode(500, new Object[] { eSql.Message, invoice });
             }
         }
 
