@@ -146,6 +146,10 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                             cmd.CommandText = readLatestOrder;
                             using (NpgsqlDataReader reader = cmd.ExecuteReader())
                             {
+                                if (!reader.HasRows)
+                                {
+                                    return Ok(new object());
+                                }
                                 while (reader.Read())
                                 {
                                     order.OrderId = reader.GetInt32(0);
