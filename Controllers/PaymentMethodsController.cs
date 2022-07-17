@@ -46,7 +46,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                                     //Use castings so that nulls get created if needed
                                     paymentMethod.PaymentMethodId = reader.GetInt32(0);
                                     paymentMethod.Description = reader[1] as string;
-                                    paymentMethods.Add(paymentMethod);//Add customer to list
+                                    paymentMethods.Add(paymentMethod);//Add method to list
                                 }
                             }
                         }
@@ -54,6 +54,48 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                     conn.Close();
                 }
                 return Ok(paymentMethods);
+            }
+            catch (Exception eSql)
+            {
+                Debug.WriteLine("Exception: " + eSql.Message);
+                return StatusCode(500, eSql.Message);
+            }
+        }
+
+        [HttpGet("search")]//Maps this method to the GET request (read)
+        public async Task<ActionResult<List<PaymentMethod>>> SearchPaymentMethod(int id)
+        {
+            PaymentMethod paymentMethod = new PaymentMethod();
+            string readPaymentMethods = "SELECT * FROM \"PaymentMethods\" WHERE \"PaymentMethodId\" = @0";
+            try
+            {
+                using (NpgsqlConnection conn = new NpgsqlConnection(db))
+                {
+                    conn.Open();
+                    if (conn.State == ConnectionState.Open)
+                    {
+                        using (NpgsqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = readPaymentMethods;
+                            cmd.Parameters.AddWithValue("@0", id);
+                            using (NpgsqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                if (!reader.HasRows)
+                                {
+                                    return Ok(new Object());
+                                }
+                                while (reader.Read())
+                                {
+                                    //Use castings so that nulls get created if needed
+                                    paymentMethod.PaymentMethodId = reader.GetInt32(0);
+                                    paymentMethod.Description = reader[1] as string;
+                                }
+                            }
+                        }
+                    }
+                    conn.Close();
+                }
+                return Ok(paymentMethod);
             }
             catch (Exception eSql)
             {

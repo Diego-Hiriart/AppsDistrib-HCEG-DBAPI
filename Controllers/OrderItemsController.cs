@@ -51,7 +51,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
             catch (Exception eSql)
             {
                 Debug.WriteLine("Exception: " + eSql.Message);
-                return StatusCode(500, new object[] { eSql.Message, orderItem });
+                return StatusCode(500, new Object[] { eSql.Message, orderItem });
             }
         }
 
@@ -111,6 +111,10 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
                             cmd.Parameters.AddWithValue("@0", id);
                             using (NpgsqlDataReader reader = cmd.ExecuteReader())
                             {
+                                if (!reader.HasRows)
+                                {
+                                    return Ok(new Object());
+                                }
                                 while (reader.Read())
                                 {
                                     var orderItem = new OrderItem();
