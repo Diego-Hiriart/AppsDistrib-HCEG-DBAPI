@@ -104,7 +104,7 @@ namespace AppsDistrib_HCEG_DBAPI.Controllers
         }
 
         [HttpGet("search")]//Maps this method to the GET request (read)
-        public async Task<ActionResult<List<Customer>>> SearchCustomer(int id)//Uses the value from the search params (?=id)
+        public async Task<ActionResult<List<Customer>>> SearchCustomer(int id)//Uses the value from the search params (/search?id=)
         {
             Customer customer = new Customer();
             string readCustomers = "SELECT * FROM \"Customers\" WHERE \"CustomerId\" = @0";
